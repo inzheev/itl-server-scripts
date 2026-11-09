@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
+# Shell/editor/OS temporary files
+*.swp
+*.swo
+*~
+*.tmp
+*.log
+.DS_Store
+.idea/
+.vscode/
+# Credentials, local configurations, server backups
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+*.bak
+*.backup
+ssh-root-password-*/
+local/
