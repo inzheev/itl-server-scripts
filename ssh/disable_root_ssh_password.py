@@ -268,7 +268,10 @@ def check_mfa(binary, originals):
             alternatives = [entry.split(',') for entry in args]
             usable = any(not any(method.split(':')[0] in ('password', 'keyboard-interactive')
                                  for method in alternative) for alternative in alternatives)
-            if not usable:
+            key_paths = [alternative for alternative in alternatives if 'publickey' in alternative]
+            usable_key = any(not any(method.split(':')[0] in ('password', 'keyboard-interactive')
+                                     for method in alternative) for alternative in key_paths)
+            if not usable or (key_paths and not usable_key):
                 raise Failure(f'Парольная AuthenticationMethods в {path}:{number}. '
                               'Невозможно безопасно исключить влияние на root во всех Match. '
                               'Нужна ручная проверка MFA; изменений нет.')

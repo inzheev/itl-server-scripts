@@ -116,6 +116,13 @@ class ConfigTests(unittest.TestCase):
                 'permitrootlogin': 'yes', 'authenticationmethods': 'publickey,password publickey'}):
             policy.check_mfa('/fixture/sshd', originals)
 
+    def test_hostbased_alternative_does_not_hide_password_required_for_keys(self):
+        self.write('sshd_config', 'PermitRootLogin yes\n'
+                   'AuthenticationMethods publickey,password hostbased\n')
+        originals, _, _ = self.scan()
+        with self.assertRaisesRegex(policy.Failure, 'MFA'):
+            policy.check_mfa('/fixture/sshd', originals)
+
     def prepare_perform(self):
         info = {'Id': 'ssh.service', 'CanReload': 'yes', 'KillMode': 'process'}
         self.stack.enter_context(patch.object(policy, 'select_service', return_value=info))
@@ -226,7 +233,9 @@ class ConfigTests(unittest.TestCase):
         subprocess.run(['/usr/sbin/sshd', '-t', '-f', str(self.config)],
                        check=True, capture_output=True, timeout=15)
         for address in ('203.0.113.8', '198.51.100.8'):
-            self.assertEqual(effective_for(address)['permitrootlogin'], 'prohibit-password')
+            # OpenSSH versions print either spelling of the same documented policy.
+            self.assertIn(effective_for(address)['permitrootlogin'],
+                          {'prohibit-password', 'without-password'})
 
 
 class RuntimeTests(unittest.TestCase):
